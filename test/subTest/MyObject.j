@@ -1,0 +1,15 @@
+
+
+
+
+
+
+@implementation CPObject (MyObject) {
+
+
+}
+
+
+
+
+@end

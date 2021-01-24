@@ -1,0 +1,29 @@
+{
+  "name": "openstep-js",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "oj-make": "src/build/Make.js",
+    "oj-create": "./src/CreateProject.js",
+    "oj-start": "./src/Start.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ChristopherBruno78/OpenStepJS.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ChristopherBruno78/OpenStepJS/issues"
+  },
+  "homepage": "https://github.com/ChristopherBruno78/OpenStepJS#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "lodash": "^4.17.20",
+    "node-getopt": "^0.3.2",
+    "uglify-js": "^3.12.4"
+  }
+}
