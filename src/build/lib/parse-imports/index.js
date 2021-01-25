@@ -1,23 +1,39 @@
-const parseImport = require('./parser')
+const parseImport = require('./parser');
 
 module.exports = function parse(str) {
-  const lines = str.split('\n')
-  const results = []
+
+  //put multiline comment start/end on its own line
+  str = str.replace(/\/\*/g, "\n/*");
+  str = str.replace(/\*\//g, "*/\n");
+
+  const lines = str.split('\n');
+  const results = [];
+
+  let insideComment = false;
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i]
+
+    const line = lines[i];
+
+    if(isLineEndingMultilineComment(line)) {
+      insideComment = false;
+      continue;
+    }
+
+    if(isLineWithMultilineComment(line)) {
+      insideComment = true;
+      continue;
+    }
 
     if (isLineWithComment(line) || isEmptyLine(line)) {
-      continue
+      continue;
     }
 
-    if (isLineWithImport(line)) {
-      const result = parseImport(line)
-      results.push(result)
-      continue
+    if (isLineWithImport(line) && !insideComment) {
+      const result = parseImport(line);
+      results.push(result);
     }
 
-    break
   }
 
   return results
@@ -31,6 +47,16 @@ function isLineWithImport(line) {
   return line.trim().indexOf('@import') === 0
 }
 
+
+
 function isLineWithComment(line) {
-  return line.trim().indexOf('//') === 0 || line.trim().indexOf('/*') === 0
+  return line.trim().indexOf('//') === 0;
+}
+
+function isLineWithMultilineComment(line) {
+  return line.trim().indexOf('/*') >= 0;
+}
+
+function isLineEndingMultilineComment(line) {
+  return line.trim().indexOf('*/') >= 0;
 }

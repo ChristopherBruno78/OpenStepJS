@@ -3,31 +3,33 @@
 
 const FS                    = require('fs');
 const express               = require('express');
-const build                 = require('./build/Build');
+const Make                  = require('./build/Make');
 
 function generateScriptLinks(theFiles) {
     let out = "";
     theFiles.forEach((filePath) => {
-        filePath = "/"+filePath;
+        filePath = "/"+filePath.substr(0, filePath.indexOf('.'))+".code.js";
         out += `<script type='text/javascript' src=${filePath}></script>\n`;
     });
     return out;
 }
 
-express.static.mime.define({'text/javascript': ['js', 'oj']});
+express.static.mime.define({'text/javascript': ['js']});
 
 const app = express();
 app.use("/build", express.static("build"));
+app.use("/Frameworks", express.static("Frameworks"));
 
 app.get('/', (req, res) => {
 
-    let theFiles = build();
+    const result = Make.make();
+    let theFiles = result.objectFiles;
     let scriptsStr = generateScriptLinks(theFiles);
     let html = FS.readFileSync("index.html", 'utf8');
 
     let idx = html.indexOf("</body>");
     let finalHtml = html.substr(0, idx)
-                + "<script type='text/javascript' src='/build/Objective-J.js'></script>\n"
+                + "<script type='text/javascript' src='/Frameworks/Objective-J/Objective-J.js'></script>\n"
                 + scriptsStr
                 + "<script type='text/javascript'>\n"
                 + "window.addEventListener('load', window.main || null)\n"

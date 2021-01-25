@@ -5,8 +5,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "main": "templates/main.j",
   "bin": {
-    "oj-make": "src/build/Make.js",
     "oj-create": "./src/CreateProject.js",
     "oj-start": "./src/Start.js"
   },
@@ -24,6 +24,7 @@
     "express": "^4.17.1",
     "lodash": "^4.17.20",
     "node-getopt": "^0.3.2",
-    "uglify-js": "^3.12.4"
+    "uglify-js": "^3.12.4",
+    "Objective-J-Compiler": "git+https://github.com/ChristopherBruno78/Objective-J-Compiler"
   }
 }

@@ -16,12 +16,12 @@ const findBaseDirectory = require('./FindBaseDirectory');
 function parse(data) {
     let dependencies = [];
     let theImports = parseImports(data);
-    for (let i in theImports) {
-        let r = theImports[i];
+    theImports.forEach((r) => {
         if (r.fromModule && r.fromModule.length > 0) {
             dependencies.push(r.fromModule)
         }
-    }
+    });
+
     return _.uniq(dependencies);
 }
 
@@ -51,6 +51,7 @@ function parseDependencies(fileName, sourceFile) {
         for (let i in foundDependencies) {
             let foundFileName = foundDependencies[i],
                 len = foundFileName.length;
+
             if (len > 0) {
                 let firstChar = foundFileName[0];
                 if (firstChar === '<') { //found a framework
@@ -67,14 +68,19 @@ function parseDependencies(fileName, sourceFile) {
         }
 
     } catch (e) {
-        let dest = e.path;
-        if(e.syscall === 'chdir'){
-            dest = e.dest;
+        if(e.errno === -2) {
+            let dest = e.path;
+            if(e.syscall === 'chdir'){
+                dest = e.dest;
+            }
+            console.error(`ERROR in ${sourceFile}: Cannot import ${dest}, no such file or directory.`);
         }
-        console.error(`ERROR in ${sourceFile}: Cannot import ${dest}, no such file or directory.`);
+        else {
+            console.log(e);
+        }
     }
     process.chdir(currentDir);
-    return _.uniq(dependencies);
+    return _.uniq(_.reverse(dependencies));
 }
 
 module.exports = function(source) {

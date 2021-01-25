@@ -1,3 +1,4 @@
 
+@import "NSObject.j"
 
-@import 'NSObject.j'
+
