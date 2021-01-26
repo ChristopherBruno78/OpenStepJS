@@ -143,7 +143,7 @@ function compileIfNeeded(sourcePath) {
 }
 
 
-module.exports.make = function () {
+let make = function () {
 
     let result = {
         success: true,
@@ -174,12 +174,12 @@ module.exports.make = function () {
 
     console.log(dependencyFiles);
 
-    dependencyFiles.unshift(MAIN_FILE_PATH);
+    dependencyFiles.push(MAIN_FILE_PATH);
 
     let count = dependencyFiles.length,
-        i = count - 1;
+        i = 0;
 
-    for(; i >= 0; i--) {
+    for(; i < count; i++) {
         let theFilePath = dependencyFiles[i];
         let out = compileIfNeeded(theFilePath);
         result.sourceFiles.push(out.sourceFile);
@@ -188,9 +188,36 @@ module.exports.make = function () {
         result.LOG.push.apply(result.LOG, out.LOG);
     }
 
-    //copy the Objective-J runtime
-
-
     return result;
-}
+};
 
+
+let build = function(outFileName) {
+
+    if(!outFileName) {
+        outFileName = "build.js";
+    }
+
+    let result = make();
+
+    let LOG = result.LOG;
+
+    LOG.forEach((issue) => {
+        if(issue.severity === 'error') {
+            console.error(`Error: ${issue.message}`);
+            process.exit(1);
+        }
+        else {
+            console.warn(`${issue.severity}: ${issue.message}`)
+        }
+    });
+
+    FS.writeFileSync(PATH.join(BUILD_DIR, outFileName),
+            result.code,
+            "utf8"
+    );
+};
+
+
+module.exports.make = make;
+module.exports.build = build;

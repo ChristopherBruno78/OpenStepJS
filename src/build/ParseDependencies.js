@@ -44,10 +44,6 @@ function parseDependencies(fileName, sourceFile) {
             FS.readFileSync(pathName, 'utf8')
         );
 
-        if (sourceFile) {
-            dependencies.push(pathName);
-        }
-
         for (let i in foundDependencies) {
             let foundFileName = foundDependencies[i],
                 len = foundFileName.length;
@@ -66,7 +62,6 @@ function parseDependencies(fileName, sourceFile) {
                 }
             }
         }
-
     } catch (e) {
         if(e.errno === -2) {
             let dest = e.path;
@@ -79,8 +74,13 @@ function parseDependencies(fileName, sourceFile) {
             console.log(e);
         }
     }
+
+    if (sourceFile) {
+        dependencies.push(pathName);
+    }
+
     process.chdir(currentDir);
-    return _.uniq(_.reverse(dependencies));
+    return _.uniq(dependencies);
 }
 
 module.exports = function(source) {
