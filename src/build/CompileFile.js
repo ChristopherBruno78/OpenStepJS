@@ -13,10 +13,6 @@ module.exports = function(sourceFileName) {
     try {
         const source = FS.readFileSync(sourceFileName, 'utf8');
         final = Object.assign(final, compile(source, sourceFileName));
-        if (final.error) {
-            let err = final.error;
-            console.error(`Compilation error in ${sourceFileName} at (${err.lineInfo.line}, ${err.lineInfo.column}): ${err.message}`);
-        }
     }
     catch (e) {
         final.exception = e;

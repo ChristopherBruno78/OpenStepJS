@@ -103,7 +103,7 @@ function compileIfNeeded(sourcePath) {
         let err = compilationObj.error;
         out.LOG.push({
             severity : "error",
-            message: `Compilation error in ${relativeSourcePath} at (${err.lineInfo.line}, ${err.lineInfo.column}): ${err.message}`,
+            message: `Parsing error in ${relativeSourcePath} at (${err.lineInfo.line}, ${err.lineInfo.column}): ${err.message}`,
             sourceFile: relativeSourcePath
         })
         return out;
@@ -122,6 +122,7 @@ function compileIfNeeded(sourcePath) {
         let severity = issue.severity.toUpperCase();
         let sourceFile = PATH.relative(process.cwd(), issue.file);
         let lineInfo = issue.lineInfo;
+        console.log(issue);
         out.LOG.push({
             severity : severity,
             message : `${issue.message} in ${sourceFile} at (${lineInfo.line},${lineInfo.column})`,
@@ -171,23 +172,19 @@ let make = function () {
     FS.mkdirSync(BUILD_DIR, {recursive: true});
 
     //gather dependencies
-    let dependencyFiles = parseDependencies(MAIN_FILE_PATH);
-
-    console.log(dependencyFiles);
-
-    dependencyFiles.push(MAIN_FILE_PATH);
-
-    let count = dependencyFiles.length,
-        i = 0;
-
-    for(; i < count; i++) {
-        let theFilePath = dependencyFiles[i];
+    const dependencyFiles = parseDependencies(MAIN_FILE_PATH);
+    //process
+    dependencyFiles.forEach((dependency) => {
+        let theFilePath = dependency.path
+        //add any import issues to the LOG
+        result.LOG.push.apply(result.LOG, dependency.issues);
         let out = compileIfNeeded(theFilePath);
         result.sourceFiles.push(out.sourceFile);
         result.objectFiles.push(out.objectFile);
         result.code += (out.code || "");
+        //add any compilation issues to the LOG
         result.LOG.push.apply(result.LOG, out.LOG);
-    }
+    })
 
     return result;
 };
@@ -204,15 +201,15 @@ let build = function(outFileName, keepArtifacts) {
     let LOG = result.LOG;
 
     LOG.forEach((issue) => {
+        let severity = issue.severity.toUpperCase();
         if(issue.severity === 'error') {
-            console.error(`Error: ${issue.message}`);
+            console.error(`${severity}: ${issue.message}`)
             process.exit(1);
         }
         else {
-            console.warn(`${issue.severity}: ${issue.message}`)
+            console.warn(`${severity}: ${issue.message}`)
         }
     });
-
 
     //remove artifacts
     if(!keepArtifacts) {
@@ -227,7 +224,7 @@ let build = function(outFileName, keepArtifacts) {
 };
 
 let clean = function() {
-    FS.rmdirSync(BUILD_DIR, {recursive: true});
+    fsExtra.removeSync(BUILD_DIR);
 }
 
 

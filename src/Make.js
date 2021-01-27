@@ -24,7 +24,6 @@ let argv = opt.argv;
 let options = opt.options;
 
 if(argv.indexOf("clean") > -1) {
-    console.log("here")
     Make.clean();
     process.exit(0);
 }

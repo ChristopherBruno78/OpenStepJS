@@ -25,64 +25,82 @@ function parse(data) {
     return _.uniq(dependencies);
 }
 
+
 let FRAMEWORKS_PATH = undefined;
 
-function parseDependencies(fileName, sourceFile) {
+function checkFile(filePath, sourcePath, visited) {
 
-    if(!FRAMEWORKS_PATH) {
-        FRAMEWORKS_PATH = PATH.join(findBaseDirectory(process.cwd(), 'Frameworks'), 'Frameworks');
+    if(FS.existsSync(filePath)) {
+        if(visited.indexOf(filePath) < 0) {
+            return null;
+        }
+        else {
+            return {
+                    severity: "warning",
+                    message: `Circular import found in file "${sourcePath}"`,
+                    sourceFile: PATH.relative(process.cwd(), sourcePath)
+                };
+        }
     }
+    else {
+       return {
+            severity: "warning",
+            message: `Invalid import "${filePath}" found in "${sourcePath}" - no such file or directory.`,
+            sourceFile: PATH.relative(process.cwd(), sourcePath)
+        };
+    }
+}
+
+function parseDependencies(fileName, visited, sourceFile) {
+
+    let issues = [];
+    const pathName = PATH.resolve(fileName);
+
+    visited.push(pathName);
 
     let dependencies = [];
-    const pathName = PATH.resolve(fileName);
     let currentDir = process.cwd();
     process.chdir(PATH.dirname(pathName));
 
-    try {
+    let foundDependencies = parse(
+        FS.readFileSync(pathName, 'utf8')
+    );
 
-        let foundDependencies = parse(
-            FS.readFileSync(pathName, 'utf8')
-        );
-
-        for (let i in foundDependencies) {
-            let foundFileName = foundDependencies[i],
-                len = foundFileName.length;
-
-            if (len > 0) {
-                let firstChar = foundFileName[0];
-                if (firstChar === '<') { //found a framework
-                    let frameworkRelativePath = foundFileName.substr(1, len-2);
-                    let frameworkPath = PATH.join(FRAMEWORKS_PATH, frameworkRelativePath);
-                    dependencies.push.apply(
-                        dependencies, parseDependencies(frameworkPath, fileName)
-                    );
-
-                } else {
-                    dependencies.push.apply(dependencies, parseDependencies(foundFileName, fileName));
-                }
+    for (let i in foundDependencies) {
+        let foundFileName = foundDependencies[i],
+            len = foundFileName.length,
+            importPath = null;
+        if (len > 0) {
+            let firstChar = foundFileName[0];
+            if (firstChar === '<') { //found a framework
+                let frameworkRelativePath = foundFileName.substr(1, len-2);
+                importPath = PATH.join(FRAMEWORKS_PATH, frameworkRelativePath);
+            } else {
+                importPath = foundFileName;
             }
-        }
-    } catch (e) {
-        if(e.errno === -2) {
-            let dest = e.path;
-            if(e.syscall === 'chdir'){
-                dest = e.dest;
+
+            let importIssue = checkFile(importPath, pathName, visited);
+            if(importIssue) {
+                issues.push(importIssue)
             }
-            console.error(`ERROR in ${sourceFile}: Cannot import ${dest}, no such file or directory.`);
-        }
-        else {
-            console.log(e);
+            else {
+                dependencies.push.apply(dependencies,
+                    parseDependencies(importPath, visited, fileName)
+                );
+            }
         }
     }
 
-    if (sourceFile) {
-        dependencies.push(pathName);
-    }
+    dependencies.push({
+        path: pathName,
+        issues: issues
+    });
 
     process.chdir(currentDir);
-    return _.uniq(dependencies);
+    return dependencies;
 }
 
 module.exports = function(source) {
-    return parseDependencies(source, false);
+    FRAMEWORKS_PATH = PATH.join(findBaseDirectory(process.cwd(), 'Frameworks'), 'Frameworks');
+    return parseDependencies(source, [])
 };
