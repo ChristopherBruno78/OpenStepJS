@@ -33,7 +33,7 @@ function getBaseDirectoryPath(source, baseName) {
     }
 
     if(sourcePathDir === ROOT_FOLDER) {
-        console.error(`Error: Unable to find "${baseName}" in project`);
+        console.error(`ERROR: Unable to find "${baseName}" in project`);
         process.exit(1);
     }
 

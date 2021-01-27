@@ -132,6 +132,8 @@ function compileIfNeeded(sourcePath) {
 
     //create the oj file
     out.code = compilationObj.code;
+    out.superclassRefs = compilationObj.superclassRefs;
+    out.classDefs = Object.keys(compilationObj.classDefs);
     FS.writeFileSync(out.objectFile,
         JSON.stringify(out)
         , 'utf8');
@@ -174,11 +176,24 @@ let make = function () {
     //gather dependencies
     const dependencyFiles = parseDependencies(MAIN_FILE_PATH);
     //process
+    let classDefs = [];
     dependencyFiles.forEach((dependency) => {
         let theFilePath = dependency.path
         //add any import issues to the LOG
         result.LOG.push.apply(result.LOG, dependency.issues);
         let out = compileIfNeeded(theFilePath);
+        //validate any used superclasses
+        out.superclassRefs.forEach((ref) => {
+            if(classDefs.indexOf(ref.superclass) < 0) {
+                result.LOG.push({
+                    severity: 'error',
+                    message: `cannot find implementation declaration for "${ref.superclass}", superclass of "${ref.class}" in "${theFilePath}"`,
+                    sourceFile: PATH.relative(process.cwd(), theFilePath)
+                });
+            }
+        });
+        //save classDef
+        classDefs.push.apply(classDefs, out.classDefs);
         result.sourceFiles.push(out.sourceFile);
         result.objectFiles.push(out.objectFile);
         result.code += (out.code || "");
@@ -226,7 +241,6 @@ let build = function(outFileName, keepArtifacts) {
 let clean = function() {
     fsExtra.removeSync(BUILD_DIR);
 }
-
 
 module.exports.make = make;
 module.exports.build = build;
