@@ -64,7 +64,6 @@
 
 - (String)UID
 {
-
     if (typeof self._UID === "undefined")
         self._UID = objj_generateObjectUID();
 
@@ -79,12 +78,10 @@
     you need your class to not support a method that it has inherited from a super class.
 */
 
-
 -(BOOL) doesNotRecognizeSelector:(SEL)aSelector {
 	throw new Error((class_isMetaClass(isa) ? "+" : "-") + " [" + [self className] + " " + aSelector + "] unrecognized selector sent to " +
         (class_isMetaClass(isa) ? "class " + class_getName(isa) : "instance " + [self UID]));
 }
-
 
 @end
 

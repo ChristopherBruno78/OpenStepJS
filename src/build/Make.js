@@ -3,6 +3,7 @@
 const FS                    = require('fs'),
     PATH                    = require('path');
 
+const fsExtra               = require("fs-extra");
 const Uglify                = require('uglify-js');
 
 const parseDependencies     = require('./ParseDependencies');
@@ -192,7 +193,7 @@ let make = function () {
 };
 
 
-let build = function(outFileName) {
+let build = function(outFileName, keepArtifacts) {
 
     if(!outFileName) {
         outFileName = "build.js";
@@ -212,12 +213,24 @@ let build = function(outFileName) {
         }
     });
 
+
+    //remove artifacts
+    if(!keepArtifacts) {
+        fsExtra.emptyDirSync(BUILD_DIR);
+    }
+
     FS.writeFileSync(PATH.join(BUILD_DIR, outFileName),
-            result.code,
-            "utf8"
+        result.code,
+        "utf8"
     );
+
 };
+
+let clean = function() {
+    FS.rmdirSync(BUILD_DIR, {recursive: true});
+}
 
 
 module.exports.make = make;
 module.exports.build = build;
+module.exports.clean = clean;

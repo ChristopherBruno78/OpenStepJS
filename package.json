@@ -7,6 +7,7 @@
   },
   "main": "templates/main.j",
   "bin": {
+    "oj-make": "./src/Make.js",
     "oj-create": "./src/CreateProject.js",
     "oj-start": "./src/Start.js"
   },
@@ -21,10 +22,11 @@
   },
   "homepage": "https://github.com/ChristopherBruno78/OpenStepJS#readme",
   "dependencies": {
+    "Objective-J-Compiler": "git+https://github.com/ChristopherBruno78/Objective-J-Compiler",
     "express": "^4.17.1",
+    "fs-extra": "^9.1.0",
     "lodash": "^4.17.20",
     "node-getopt": "^0.3.2",
-    "uglify-js": "^3.12.4",
-    "Objective-J-Compiler": "git+https://github.com/ChristopherBruno78/Objective-J-Compiler"
+    "uglify-js": "^3.12.4"
   }
 }

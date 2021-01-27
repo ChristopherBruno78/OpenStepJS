@@ -3,5 +3,5 @@
 
 
 function main() {
-    alert('hello, world!!!');
+    alert("Test");
 }
