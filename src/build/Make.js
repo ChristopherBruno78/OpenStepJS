@@ -6,7 +6,6 @@ const FS                    = require('fs'),
 const fsExtra               = require("fs-extra");
 const Uglify                = require('uglify-js');
 
-const parseDependencies     = require('./ParseDependencies');
 const findBaseDirectory     = require('./FindBaseDirectory');
 
 const compileFile = require('./CompileFile');
@@ -130,10 +129,12 @@ function compileIfNeeded(sourcePath) {
         });
     });
 
+
     //create the oj file
     out.code = compilationObj.code;
     out.superclassRefs = compilationObj.superclassRefs;
     out.classDefs = Object.keys(compilationObj.classDefs);
+    out.dependencies = compilationObj.dependencies;
     FS.writeFileSync(out.objectFile,
         JSON.stringify(out)
         , 'utf8');
@@ -142,18 +143,60 @@ function compileIfNeeded(sourcePath) {
             out.code,
             "utf8"
     );
-
     return out;
+}
+
+const FRAMEWORKS_PATH = PATH.join(findBaseDirectory(process.cwd(), 'Frameworks'), 'Frameworks');
+
+function compileWithDependencies(sourcePath, compilationLog, parentPath) {
+
+    let relPath = PATH.relative(process.cwd(), sourcePath);
+
+    if(compilationLog.sourceFiles.indexOf(relPath) > -1) {
+        return compilationLog;
+    }
+
+    let out = compileIfNeeded(sourcePath);
+    if(parentPath) {
+        let pIndex = compilationLog.sourceFiles.indexOf(parentPath);
+        compilationLog.sourceFiles.splice(pIndex, 0, out.sourceFile);
+        compilationLog.objectFiles.splice(pIndex, 0, out.objectFile);
+    }
+    else {
+        compilationLog.sourceFiles.push(out.sourceFile);
+        compilationLog.objectFiles.push(out.objectFile);
+    }
+
+    if(out.dependencies) {
+        out.dependencies.forEach((relFilePath) => {
+            let len = relFilePath.length,
+                importPath = null;
+            if (len > 0) {
+                let firstChar = relFilePath[0];
+                if (firstChar === '<') { //found a framework
+                    let frameworkRelativePath = relFilePath.substr(1, len - 2);
+                    importPath = PATH.join(FRAMEWORKS_PATH, frameworkRelativePath);
+                } else {
+                    importPath = PATH.resolve(
+                        PATH.join(PATH.dirname(sourcePath), relFilePath)
+                    );
+                }
+                compileWithDependencies(importPath, compilationLog, relPath);
+            }
+        });
+    }
+
+    return compilationLog;
 }
 
 
 let make = function () {
 
     let result = {
-        success: true,
         code: "",
         objectFiles : [],
-        sourceFiles : []
+        sourceFiles : [],
+        classDefs: []
     };
     //read package json to find main file
     const pkgJSON = require(PKG_LOC);
@@ -173,46 +216,39 @@ let make = function () {
     result.LOG = [];
     FS.mkdirSync(BUILD_DIR, {recursive: true});
 
-    //gather dependencies
-    const dependencyFiles = parseDependencies(MAIN_FILE_PATH);
-    //process
-    let classDefs = [];
-    dependencyFiles.forEach((dependency) => {
-        let theFilePath = dependency.path
-        //add any import issues to the LOG
-        result.LOG.push.apply(result.LOG, dependency.issues);
-        let out = compileIfNeeded(theFilePath);
-        //validate any used superclasses
-        out.superclassRefs.forEach((ref) => {
-            if(classDefs.indexOf(ref.superclass) < 0) {
-                result.LOG.push({
-                    severity: 'error',
-                    message: `cannot find implementation declaration for "${ref.superclass}", superclass of "${ref.class}" in "${theFilePath}"`,
-                    sourceFile: PATH.relative(process.cwd(), theFilePath)
-                });
-            }
-        });
-        //save classDef
-        classDefs.push.apply(classDefs, out.classDefs);
-        result.sourceFiles.push(out.sourceFile);
-        result.objectFiles.push(out.objectFile);
-        result.code += (out.code || "");
-        //add any compilation issues to the LOG
-        result.LOG.push.apply(result.LOG, out.LOG);
-    })
+    Object.assign(result, compileWithDependencies(MAIN_FILE_PATH, {
+        sourceFiles: [],
+        objectFiles: [],
+        LOG: []
+    }));
+
+    result.objectFiles.forEach((relPath) => {
+        let obj = JSON.parse(FS.readFileSync(relPath, 'utf8'));
+        //check for any unimplemented superclasses
+        if(obj.superclassRefs) {
+            obj.superclassRefs.forEach((ref) => {
+                if(ref.superclass) {
+                    if(result.classDefs.indexOf(ref.superclass) < 0) {
+                        result.LOG.push({
+                            severity: 'error',
+                            message: `cannot find implementation declaration for "${ref.superclass}", superclass of "${ref.class}" in "${obj.sourceFile}"`,
+                            sourceFile: obj.sourceFile
+                        });
+                    }
+                }
+            })
+        }
+        result.classDefs.push.apply(result.classDefs, obj.classDefs);
+        result.code += (obj.code);
+    });
 
     return result;
 };
 
 
-let build = function(outFileName, keepArtifacts) {
-
-    if(!outFileName) {
-        outFileName = "build.js";
-    }
+let build = function(outFileName, minify) {
 
     let result = make();
-
     let LOG = result.LOG;
 
     LOG.forEach((issue) => {
@@ -226,16 +262,17 @@ let build = function(outFileName, keepArtifacts) {
         }
     });
 
-    //remove artifacts
-    if(!keepArtifacts) {
-        fsExtra.emptyDirSync(BUILD_DIR);
+    if(outFileName) {
+        //remove artifacts
+        let outCode = result.code;
+        if(minify) {
+            outCode = Uglify.minify(outCode).code;
+        }
+        FS.writeFileSync(PATH.join(BUILD_DIR, outFileName),
+            outCode,
+            "utf8"
+        );
     }
-
-    FS.writeFileSync(PATH.join(BUILD_DIR, outFileName),
-        result.code,
-        "utf8"
-    );
-
 };
 
 let clean = function() {

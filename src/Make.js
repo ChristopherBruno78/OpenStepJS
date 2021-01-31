@@ -7,7 +7,7 @@ const getopt        = require("node-getopt");
 
 let opt = getopt.create([
     ["o", "output=FILE", "output .js file"],
-    ["k", "keep", "Keep build artifacts"]
+    ["m", "minify", "Minify the output file"]
 ]);
 
 opt.setHelp(
@@ -28,4 +28,4 @@ if(argv.indexOf("clean") > -1) {
     process.exit(0);
 }
 
-Make.build(options["output"], options["k"] !== undefined);
+Make.build(options["output"], options["m"] !== undefined);
