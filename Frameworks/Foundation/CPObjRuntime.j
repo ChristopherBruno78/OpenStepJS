@@ -4,22 +4,22 @@
 
 objj_defineGlobals({
 
-        NSStringFromSelector : function(aSelector)
+        CPStringFromSelector : function(aSelector)
     	{
     	    return sel_getName(aSelector);
     	},
 
-    	NSSelectorFromString : function(aSelectorName)
+    	CPSelectorFromString : function(aSelectorName)
     	{
     	    return sel_registerName(aSelectorName);
     	},
 
-    	NSClassFromString : function(aClassName)
+    	CPClassFromString : function(aClassName)
     	{
     	    return objj_getClass(aClassName);
     	},
 
-    	NSStringFromClass : function(aClass)
+    	CPStringFromClass : function(aClass)
     	{
     	    return class_getName(aClass);
     	},
@@ -29,20 +29,20 @@ objj_defineGlobals({
     	    @global
     	    @group NSComparisonResult
     	*/
-    	NSOrderedAscending      : -1,
+    	CPOrderedAscending      : -1,
     	/*!
     	    The left and right operands are equal.
     	    @global
     	    @group NSComparisonResult
     	*/
-    	NSOrderedSame           :  0,
+    	CPOrderedSame           :  0,
     	/*!
     	    The left operand is greater than the right.
     	    @global
     	    @group NSComparisonResult
     	*/
-    	NSOrderedDescending     :  1,
+    	CPOrderedDescending     :  1,
 
-    	NSNotFound              : -1
+    	CPNotFound              : -1
 
 });

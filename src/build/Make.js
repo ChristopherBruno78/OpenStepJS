@@ -30,14 +30,14 @@ function getObjectCodePathName(sourcePath) {
 
 function getObjectCodeFileName(sourcePath) {
     let baseName = PATH.basename(sourcePath);
-    let idx = baseName.indexOf('.');
+    let idx = baseName.indexOf('.j');
     return baseName.substr(0, idx) +".code.js";
 }
 
 
 function getObjectFileName(sourcePath) {
     let baseName = PATH.basename(sourcePath);
-    let idx = baseName.indexOf('.');
+    let idx = baseName.indexOf('.j');
     return baseName.substr(0, idx) +".oj";
 }
 
@@ -49,7 +49,7 @@ function getObjectFileName(sourcePath) {
 
 function isCompilationNeeded(sourcePath) {
 
-    if(!FS.existsSync(sourcePath)){
+	if(!FS.existsSync(sourcePath)){
         return false;
     }
 
@@ -68,35 +68,34 @@ function isCompilationNeeded(sourcePath) {
 function compileIfNeeded(sourcePath) {
 
     let relativeSourcePath = PATH.relative(process.cwd(), sourcePath);
-
     let out = {
         LOG: [],
         sourceFile : relativeSourcePath
     };
 
-    if(!FS.existsSync(sourcePath)) {
+    if (!FS.existsSync(sourcePath)) {
         out.LOG.push({
             severity : "error",
             message  : `No such file ${relativeSourcePath}`,
             sourceFile : relativeSourcePath
-        })
+        }); 
         return out;
     }
 
     out.objectFile = PATH.relative(process.cwd(), getObjectPathName(sourcePath));
-
+ 
     if(!isCompilationNeeded(sourcePath)) {
         //read the current object file
-        if(FS.existsSync(out.objectFile)) {
+        if (FS.existsSync(out.objectFile)) {
             return JSON.parse(
                 FS.readFileSync(out.objectFile, 'utf8')
             );
-        }
+        } 
         return out;
     }
 
     console.log(`Compiling ${relativeSourcePath}`)
-
+	
     let compilationObj = compileFile(sourcePath);
     if(compilationObj.error) {
         let err = compilationObj.error;
@@ -104,7 +103,7 @@ function compileIfNeeded(sourcePath) {
             severity : "error",
             message: `Parsing error in ${relativeSourcePath} at (${err.lineInfo.line}, ${err.lineInfo.column}): ${err.message}`,
             sourceFile: relativeSourcePath
-        })
+        }) 
         return out;
     }
 
@@ -113,7 +112,7 @@ function compileIfNeeded(sourcePath) {
             severity: "error",
             message: compilationObj.exception.message,
             sourceFile : relativeSourcePath
-        });
+        }); 
         return out;
     }
 
@@ -142,7 +141,7 @@ function compileIfNeeded(sourcePath) {
     FS.writeFileSync(getObjectCodePathName(sourcePath),
             out.code,
             "utf8"
-    );
+    ); 
     return out;
 }
 
@@ -151,23 +150,26 @@ const FRAMEWORKS_PATH = PATH.join(findBaseDirectory(process.cwd(), 'Frameworks')
 function compileWithDependencies(sourcePath, compilationLog, parentPath) {
 
     let relPath = PATH.relative(process.cwd(), sourcePath);
-
-    if(compilationLog.sourceFiles.indexOf(relPath) > -1) {
-        return compilationLog;
-    }
-
-    let out = compileIfNeeded(sourcePath);
-    if(parentPath) {
-        let pIndex = compilationLog.sourceFiles.indexOf(parentPath);
+	let sourceFiles = compilationLog.sourceFiles
+	
+    for (const i in sourceFiles) { 
+    	if (sourceFiles[i] === relPath) { 
+    		return compilationLog;
+    	}
+    } 
+    let out = compileIfNeeded(sourcePath, compilationLog.buildDir);
+	 
+    if (parentPath) {
+		let pIndex = compilationLog.sourceFiles.indexOf(parentPath);
         compilationLog.sourceFiles.splice(pIndex, 0, out.sourceFile);
         compilationLog.objectFiles.splice(pIndex, 0, out.objectFile);
     }
     else {
-        compilationLog.sourceFiles.push(out.sourceFile);
+		compilationLog.sourceFiles.push(out.sourceFile);
         compilationLog.objectFiles.push(out.objectFile);
-    }
-
-    if(out.dependencies) {
+    } 
+	
+    if (out.dependencies) {
         out.dependencies.forEach((relFilePath) => {
             let len = relFilePath.length,
                 importPath = null;
@@ -181,7 +183,15 @@ function compileWithDependencies(sourcePath, compilationLog, parentPath) {
                         PATH.join(PATH.dirname(sourcePath), relFilePath)
                     );
                 }
-                compileWithDependencies(importPath, compilationLog, relPath);
+				
+				if (FS.existsSync(importPath)) {
+					compileWithDependencies(importPath, compilationLog, relPath);
+				}
+				else {
+					console.error(`Error: In file "${sourcePath}", attempting to import file "${importPath}" which does not exist.`);
+				}
+				
+                
             }
         });
     }
@@ -190,7 +200,21 @@ function compileWithDependencies(sourcePath, compilationLog, parentPath) {
 }
 
 
-let make = function () {
+let make = function (mainFile) {
+
+    const SRC_DIR = PATH.join(HOME_DIR, 'src');
+	const MAIN_FILE = mainFile; 
+	
+	if(!MAIN_FILE) {
+	    //read package json to find main file
+	    const pkgJSON = require(PKG_LOC);
+	    if(!pkgJSON.main) {
+	        result.error = ("No main file defined in package.json");
+	        return result;
+	    }
+		
+		MAIN_FILE = PATH.join(SRC_DIR, pkgJSON.main);
+	}
 
     let result = {
         code: "",
@@ -198,48 +222,45 @@ let make = function () {
         sourceFiles : [],
         classDefs: []
     };
-    //read package json to find main file
-    const pkgJSON = require(PKG_LOC);
-    if(!pkgJSON.main) {
-        result.error = ("No main file defined in package.json");
-        return result;
-    }
-
-    const SRC_DIR = PATH.join(HOME_DIR, 'src');
-    const MAIN_FILE_PATH = PATH.join(SRC_DIR, pkgJSON.main);
-
-    if(!FS.existsSync(MAIN_FILE_PATH)) {
-        result.error = (`No such main file: ${MAIN_FILE_PATH}`);
+   
+    if(!FS.existsSync(MAIN_FILE)) {
+        result.error = (`No such main file: ${MAIN_FILE}`);
         return result;
     }
 
     result.LOG = [];
-    FS.mkdirSync(BUILD_DIR, {recursive: true});
+	FS.mkdirSync(BUILD_DIR, {recursive: true});
 
-    Object.assign(result, compileWithDependencies(MAIN_FILE_PATH, {
+    Object.assign(result, compileWithDependencies(MAIN_FILE, {
         sourceFiles: [],
         objectFiles: [],
         LOG: []
     }));
-
-    result.objectFiles.forEach((relPath) => {
-        let obj = JSON.parse(FS.readFileSync(relPath, 'utf8'));
-        //check for any unimplemented superclasses
-        if(obj.superclassRefs) {
-            obj.superclassRefs.forEach((ref) => {
-                if(ref.superclass) {
-                    if(result.classDefs.indexOf(ref.superclass) < 0) {
-                        result.LOG.push({
-                            severity: 'error',
-                            message: `cannot find implementation declaration for "${ref.superclass}", superclass of "${ref.class}" in "${obj.sourceFile}"`,
-                            sourceFile: obj.sourceFile
-                        });
-                    }
-                }
-            })
-        }
-        result.classDefs.push.apply(result.classDefs, obj.classDefs);
-        result.code += (obj.code);
+	 
+    result.objectFiles.forEach((relPath) => { 
+		try{
+			let obj = JSON.parse(FS.readFileSync(relPath, 'utf8'));
+	        //check for any unimplemented superclasses
+	        if (obj.superclassRefs) {
+	            obj.superclassRefs.forEach((ref) => {
+	                if(ref.superclass) {
+	                    if(result.classDefs.indexOf(ref.superclass) < 0) {
+	                        result.LOG.push({
+	                            severity: 'error',
+	                            message: `cannot find implementation declaration for "${ref.superclass}", superclass of "${ref.class}" in "${obj.sourceFile}"`,
+	                            sourceFile: obj.sourceFile
+	                        });
+	                    }
+	                }
+	            })
+	        }
+	        result.classDefs.push.apply(result.classDefs, obj.classDefs);
+			result.code += (obj.code);	
+		}
+		catch (e) {
+			console.error(e)
+		}
+		
     });
 
     return result;
@@ -278,7 +299,7 @@ let build = function(outFileName, minify) {
 let clean = function() {
     fsExtra.removeSync(BUILD_DIR);
 }
-
+ 
 module.exports.make = make;
 module.exports.build = build;
 module.exports.clean = clean;

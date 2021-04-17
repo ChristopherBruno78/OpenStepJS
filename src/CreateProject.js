@@ -15,12 +15,22 @@ function copyFramework(projectName, frameworkName) {
     );
 }
 
+function copyTemplate(projectName, targetFolder, templateFileName) {
+	FS.writeFileSync(PATH.join(projectName, targetFolder+"/"+templateFileName),
+        FS.readFileSync(
+            PATH.join(__dirname, "templates/"+templateFileName),
+            "utf8"
+        ),
+        "utf8"
+	);		
+}
 
 function createProject(projectName) {
 
     let pkgJSON = {
         name : projectName,
         main : "main.j",
+		appDelegateClass: "AppController",
         scripts: {
             build : "oj-make"
         }
@@ -33,23 +43,10 @@ function createProject(projectName) {
 
     FS.mkdirSync(PATH.join(projectName, "src"));
 
-    //write index.html
-    FS.writeFileSync(PATH.join(projectName, "index.html"),
-            FS.readFileSync(
-                PATH.join(__dirname, "templates/index.html"),
-                "utf8"
-            ),
-            "utf8"
-    );
-
-    //write main.j
-    FS.writeFileSync(PATH.join(projectName, "src/main.j"),
-              FS.readFileSync(
-                  PATH.join(__dirname, "templates/main.j"),
-                  "utf8"
-              ),
-             "utf8"
-    );
+    //write templates
+	copyTemplate(projectName, "", "index.html");
+    copyTemplate(projectName, "src", "main.j");
+	copyTemplate(projectName, "src", "AppController.j");
 
     FS.mkdirSync(PATH.join(projectName, "Frameworks"));
 

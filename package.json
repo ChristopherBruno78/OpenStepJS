@@ -9,7 +9,8 @@
   "bin": {
     "oj-make": "./src/Make.js",
     "oj-create": "./src/CreateProject.js",
-    "oj-start": "./src/Start.js"
+    "oj-start": "./src/Start.js",
+    "oj-test": "./src/RunTest.js"
   },
   "repository": {
     "type": "git",
