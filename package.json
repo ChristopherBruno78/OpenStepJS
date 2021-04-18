@@ -1,7 +1,7 @@
 {
-  "name": "openstep-js",
+  "name": "CappuccinoRx",
   "version": "1.0.0",
-  "description": "",
+  "description": "Cappuccino Redux, an OpenStep like framework for web development.",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -14,14 +14,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ChristopherBruno78/OpenStepJS.git"
+    "url": "git+https://github.com/ChristopherBruno78/CappuccinoRx.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/ChristopherBruno78/OpenStepJS/issues"
+    "url": "https://github.com/ChristopherBruno78/CappuccinoRx/issues"
   },
-  "homepage": "https://github.com/ChristopherBruno78/OpenStepJS#readme",
+  "homepage": "https://github.com/ChristopherBruno78/CappuccinoRx#readme",
   "dependencies": {
     "Objective-J-Compiler": "git+https://github.com/ChristopherBruno78/Objective-J-Compiler",
     "express": "^4.17.1",
