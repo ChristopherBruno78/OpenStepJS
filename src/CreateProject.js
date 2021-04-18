@@ -16,23 +16,24 @@ function copyFramework(projectName, frameworkName) {
 }
 
 function copyTemplate(projectName, targetFolder, templateFileName) {
-	FS.writeFileSync(PATH.join(projectName, targetFolder+"/"+templateFileName),
+	FS.writeFileSync(PATH.join(projectName, targetFolder + "/" + templateFileName),
         FS.readFileSync(
-            PATH.join(__dirname, "templates/"+templateFileName),
+            PATH.join(__dirname, "templates/" + templateFileName),
             "utf8"
         ),
         "utf8"
-	);		
+    );
 }
 
 function createProject(projectName) {
 
     let pkgJSON = {
-        name : projectName,
-        main : "main.j",
-		appDelegateClass: "AppController",
+        name: projectName,
+        main: "main.j",
+        appDelegateClass: "AppController",
         scripts: {
-            build : "oj-make"
+            build: "capp-make",
+            start: "capp-start"
         }
     }
     //write package.json
@@ -62,7 +63,7 @@ let opt = getopt.create([
 ]);
 
 opt.setHelp(
-    "Usage: oj-create {projectName}\n" +
+    "Usage: capp-create {projectName}\n" +
     "\n" +
     "[[OPTIONS]]\n" +
     "\n"
@@ -78,10 +79,9 @@ if(argv.length === 1) {
     const projectName = argv[0];
     try {
         FS.mkdirSync(projectName);
-        console.log("Creating OpenStep-JS project...");
         createProject(projectName);
+        console.log(`Created a CappuccinoRx project called "${projectName}"`);
     }catch (e) {
-        console.log(e);
         console.error(`Error: Folder with name "${projectName}" already exists.`);
         process.exit(1);
     }

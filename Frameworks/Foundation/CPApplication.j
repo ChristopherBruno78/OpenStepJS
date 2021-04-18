@@ -2,27 +2,29 @@
 
 var CPApp = null;
 
-
 @implementation CPApplication : CPObject
 
-+(CPApplication) sharedApplication {
-	if (!CPApp) {
-		CPApp = [CPApplication new];
-	}
-	return CPApp;
++ (CPApplication)sharedApplication{
+
+    if (!CPApp)
+    {
+        CPApp = [CPApplication new];
+    }
+    return CPApp;
 }
 
--(id) init {
+- (id)init
+{
 
-	self = [super init];
+    self = [super init];
 
-	CPApp = self;
+    CPApp = self;
 
-	if ( self ) {
+    if (self)
+    {
+    }
 
-	}
-
-	return self;
+    return self;
 }
 
 @end

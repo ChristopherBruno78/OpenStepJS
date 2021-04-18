@@ -1,15 +1,15 @@
 
 @import <Foundation/Foundation.j>
 
-let anArray = [[CPArray alloc] initWithObjects:@"Bellows"];
+var anArray = [[CPArray alloc] initWithObjects: @"Bellows"];
 
 
-[anArray addObject:@"Hello"];
-[anArray addObject:@"World"];
+[anArray addObject: @"Hello"];
+[anArray addObject: @"World"];
 
 console.assert([anArray count] == 3, "CPArray is not adding objects.");
 
-[anArray replaceObjectAtIndex:1 withObject:@"Goodbye"];
+[anArray replaceObjectAtIndex: 1 withObject: @"Goodbye"];
 
 console.log(anArray);
 

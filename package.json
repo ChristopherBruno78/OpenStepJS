@@ -3,14 +3,14 @@
   "version": "1.0.0",
   "description": "Cappuccino Redux, an OpenStep like framework for web development.",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"TODO\" && exit 1"
   },
   "main": "templates/main.j",
   "bin": {
-    "oj-make": "./src/Make.js",
-    "oj-create": "./src/CreateProject.js",
-    "oj-start": "./src/Start.js",
-    "oj-test": "./src/RunTest.js"
+    "capp-make": "./src/Make.js",
+    "capp-create": "./src/CreateProject.js",
+    "capp-start": "./src/Start.js",
+    "oj-run": "./src/Run.js"
   },
   "repository": {
     "type": "git",

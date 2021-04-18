@@ -1,7 +1,12 @@
+/*
+ * CPRange.j
+ * Foundation
+ */
+
 /*!
     @addtogroup foundation
     @{
-*/
+ */
 
 @typedef CPRange
 

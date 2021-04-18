@@ -1,3 +1,10 @@
+/*
+ * CPArray.j
+ * Foundation
+ *
+ *
+ */
+
 @import "CPObject.j"
 @import "CPRange.j"
 
@@ -18,13 +25,13 @@ var concat = Array.prototype.concat,
 
 - (id)initWithObjects:(id)anObject, ...
 {
-	// The arguments array contains self and _cmd, so the first object is at position 2.
+    // The arguments array contains self and _cmd, so the first object is at position 2.
     let index = 2,
         count = arguments.length;
 
     for (; index < count; ++index)
         if (arguments[index] == nil)
-            break;
+        break;
 
     return slice.call(arguments, 2, index);
 
@@ -38,7 +45,7 @@ var concat = Array.prototype.concat,
 - (id)objectAtIndex:(CPUInteger)anIndex
 {
     if (anIndex >= self.length || anIndex < 0)
-        throw new Exception("CPArray out or range");
+        throw new Error("CPArray out or range");
 
     return self[anIndex];
 }
@@ -53,7 +60,7 @@ var concat = Array.prototype.concat,
 
         for (; index < count; ++index)
             if ([self[index] isEqual:anObject])
-                return index;
+            return index;
 
         return CPNotFound;
     }
@@ -71,7 +78,7 @@ var concat = Array.prototype.concat,
 
     for (; index < count; ++index)
         if (self[index] === anObject)
-            return index;
+        return index;
 
     return CPNotFound;
 }
@@ -79,7 +86,7 @@ var concat = Array.prototype.concat,
 - (void)insertObject:(id)anObject atIndex:(CPUInteger)anIndex
 {
     if (anIndex > self.length || anIndex < 0)
-         throw new Exception("CPArray out or range");
+        throw new Error("CPArray out or range");
 
     splice.call(self, anIndex, 0, anObject);
 }
@@ -87,7 +94,7 @@ var concat = Array.prototype.concat,
 - (void)removeObjectAtIndex:(CPUInteger)anIndex
 {
     if (anIndex >= self.length || anIndex < 0)
-        throw new Exception("CPArray out or range");
+        throw new Error("CPArray out or range");
 
     splice.call(self, anIndex, 1);
 }
@@ -125,7 +132,7 @@ var concat = Array.prototype.concat,
 - (void)removeObjectsInRange:(CPRange)aRange
 {
     if (aRange.location < 0 || CPMaxRange(aRange) > self.length)
-        throw new Exception("CPArray range exception");
+        throw new Error("CPArray range exception");
 
     splice.call(self, aRange.location, aRange.length);
 }
@@ -133,7 +140,7 @@ var concat = Array.prototype.concat,
 - (void)replaceObjectAtIndex:(CPUInteger)anIndex withObject:(id)anObject
 {
     if (anIndex >= self.length || anIndex < 0)
-        throw new Exception("CPArray range exception");
+        throw new Error("CPArray range exception");
 
     self[anIndex] = anObject;
 }

@@ -2,6 +2,7 @@
 @import "AppController.j"
 
 
-function main() {
+function main()
+{
     alert("Test");
-}
+}  

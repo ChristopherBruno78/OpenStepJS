@@ -1,10 +1,11 @@
-const PATH  = require('path'),
-      OS    = require('os'),
-      FS    = require('fs');
+const PATH = require("path"),
+    OS = require("os"),
+    FS = require("fs");
 
-"use strict"
+("use strict");
 
-const ROOT_FOLDER = ("win32" === OS.platform()) ? process.cwd().split(PATH.sep)[0] : "/";
+const ROOT_FOLDER =
+    "win32" === OS.platform() ? process.cwd().split(PATH.sep)[0] : "/";
 
 /**
  * Returns all the directories and files in path source
@@ -14,7 +15,7 @@ const ROOT_FOLDER = ("win32" === OS.platform()) ? process.cwd().split(PATH.sep)[
 function ls(source) {
     let currentDir = process.cwd();
     process.chdir(PATH.dirname(source));
-    let dirLst =  FS.readdirSync(source);
+    let dirLst = FS.readdirSync(source);
     process.chdir(currentDir);
     return dirLst;
 }
@@ -26,19 +27,18 @@ function ls(source) {
  * @returns {string|*} first parent directory containing baseName
  */
 function getBaseDirectoryPath(source, baseName) {
-
     let sourcePathDir = source;
-    if(!PATH.isAbsolute(sourcePathDir)) {
+    if (!PATH.isAbsolute(sourcePathDir)) {
         sourcePathDir = PATH.dirname(PATH.resolve(source));
     }
 
-    if(sourcePathDir === ROOT_FOLDER) {
+    if (sourcePathDir === ROOT_FOLDER) {
         console.error(`ERROR: Unable to find "${baseName}" in project`);
         process.exit(1);
     }
 
     let lst = ls(sourcePathDir);
-    if(lst.indexOf(baseName) < 0) {
+    if (lst.indexOf(baseName) < 0) {
         return getBaseDirectoryPath(PATH.join(sourcePathDir, "../"), baseName);
     }
 
