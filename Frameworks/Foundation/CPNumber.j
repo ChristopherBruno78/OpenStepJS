@@ -3,8 +3,6 @@
  * Foundation
  *
  */
-
-
 @import "CPNull.j"
 @import "CPObject.j"
 @import "CPObjJRuntime.j"
@@ -82,7 +80,7 @@ var CPNumberUIDs    = {};
     return anInt;
 }
 
-- (CPString)UID
+- (CPString) UID
 {
     var UID = CPNumberUIDs[self];
 

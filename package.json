@@ -10,7 +10,8 @@
     "capp-make": "./src/Make.js",
     "capp-create": "./src/CreateProject.js",
     "capp-start": "./src/Start.js",
-    "oj-run": "./src/Run.js"
+    "oj-run": "./src/Run.js",
+    "oj-format": "./src/Format.js"
   },
   "repository": {
     "type": "git",

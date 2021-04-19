@@ -38,7 +38,7 @@
     return self;
 }
 
-- (String)className
+- (CPString) className
 {
     return isa.name;
 }
@@ -106,7 +106,7 @@
     return [self UID];
 }
 
-- (String)UID
+- (CPString)UID
 {
     if (typeof self._UID === "undefined")
         self._UID = objj_generateObjectUID();
@@ -203,34 +203,6 @@ Sends the specified message to the reciever, with any number of arguments.
 {
     throw new Error((class_isMetaClass(isa) ? "+" : "-") + " [" + [self className] + " " + aSelector + "] unrecognized selector sent to " +
         (class_isMetaClass(isa) ? "class " + class_getName(isa) : "instance " + [self UID]));
-}
-
-
-    // Scripting (?)
-/*!
-    Returns the class name
- */
-- (CPString)className
-{
-    // FIXME: Why doesn't this work in KVO???
-    // return class_getName([self class]);
-    return isa.name;
-}
-
-/*!
-    Returns a hash for the object
- */
-- (unsigned)hash
-{
-    return [self UID];
-}
-
-- (CPString)UID
-{
-    if (typeof self._UID === "undefined")
-        self._UID = objj_generateObjectUID();
-
-    return self._UID + "";
 }
 
 /*!

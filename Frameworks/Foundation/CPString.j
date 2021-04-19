@@ -139,7 +139,7 @@ var CPStringUIDs = {},
 }
 
 
-    //Dividing Strings
+//Dividing Strings
 /*!
     Tokenizes the receiver string using the specified
     delimiter. For example, if the receiver is:
@@ -193,7 +193,7 @@ var CPStringUIDs = {},
     return self.substring(0, anIndex);
 }
 
-    // Finding characters and substrings
+// Finding characters and substrings
 
 /*!
     Finds the range of characters in the receiver where the specified string exists. If the string
@@ -286,7 +286,7 @@ var CPStringUIDs = {},
     return CPMakeRange(location + (aRange ? aRange.location : 0), aString.length);
 }
 
-    //Replacing Substrings
+//Replacing Substrings
 
 - (CPString)stringByEscapingRegexControlCharacters
 {
@@ -351,7 +351,7 @@ var CPStringUIDs = {},
     return self.replace(CPStringRegexTrimWhitespace, "");
 }
 
-    // Identifying and comparing strings
+// Identifying and comparing strings
 
 /*!
     Compares the receiver to the specified string.
@@ -373,7 +373,7 @@ var CPStringUIDs = {},
     return [self compare: aString options: CPCaseInsensitiveSearch];
 }
 
-    // This is for speed
+// This is for speed
 var CPStringNull = [CPNull null];
 
 /*!
@@ -590,6 +590,5 @@ var CPStringNull = [CPNull null];
 }
 
 @end
-
 
 String.prototype.isa = CPString;

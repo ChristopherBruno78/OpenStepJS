@@ -4,9 +4,9 @@ var CPApp = null;
 
 @implementation CPApplication : CPObject
 
-+ (CPApplication)sharedApplication{
++ (CPApplication)sharedApplication {
 
-    if (!CPApp)
+    if(!CPApp)
     {
         CPApp = [CPApplication new];
     }
@@ -24,7 +24,7 @@ var CPApp = null;
     {
     }
 
-    return self;
+    return self;  
 }
 
 @end
